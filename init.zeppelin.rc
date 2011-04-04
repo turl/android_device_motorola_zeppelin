@@ -127,7 +127,7 @@ on boot
     setprop rild.libargs "-d /dev/smd0"
 
     # Speed up SDCard
-    write /sys/block/mmcblk0/bdi/read_ahead_kb 1024
+    write /sys/block/mmcblk0/bdi/read_ahead_kb 4096
     
 # Touchpad driver
 service touchpad /system/bin/touchpad -a /data/touchpad.log
