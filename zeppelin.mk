@@ -83,7 +83,8 @@ PRODUCT_PACKAGES += \
     lights.zeppelin \
     Torch \
     libcamera \
-    libaudio
+    libaudio \
+    rzscontrol
 
 # we have enough storage space to hold precise GC data
 PRODUCT_TAGS += dalvik.gc.type-precise
