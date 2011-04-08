@@ -84,7 +84,10 @@ PRODUCT_PACKAGES += \
     Torch \
     libcamera \
     libaudio \
-    rzscontrol
+    rzscontrol \
+    dexpreopt
+
+DISABLE_DEXPREOPT := false
 
 # we have enough storage space to hold precise GC data
 PRODUCT_TAGS += dalvik.gc.type-precise
