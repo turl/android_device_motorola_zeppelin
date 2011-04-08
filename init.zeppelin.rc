@@ -2,10 +2,10 @@ on init
     exec /sbin/charge_only_mode
 
 on boot
-    # Smartass governor
-    #write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 528000
-    #write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 122880
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor smartass
+    # Lagfree governor
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 528000
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 122880
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor lagfree
     # Vibrator
     chown system system /sys/class/vibrator/vibrator/enable
     # Broadcom stuff
