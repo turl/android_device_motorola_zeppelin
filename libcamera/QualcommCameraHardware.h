@@ -47,7 +47,7 @@ extern "C" {
 #define CAMERA_START_SNAPSHOT 40
 #define CAMERA_STOP_SNAPSHOT 42
 #define CAMERA_EXIT 43
-#define CAMERA_GET_PARM_ZOOM 47 //MAXZOOM really
+#define CAMERA_GET_PARM_MAXZOOM 47 //MAXZOOM really
 #define CAMERA_SET_PARM_LED_MODE 50 //49
 #define CAMERA_AUTO_FOCUS_CANCEL 51
 #define CAMERA_ENABLE_AFD 53
@@ -347,6 +347,7 @@ private:
     void setAntibanding();
     void setEffect();
     void setWhiteBalance();
+    void setZoom();
     void setFlashMode();
     void updateVideoLightMode(int starting);
 
@@ -397,6 +398,7 @@ private:
     struct msm_frame_t frames[kPreviewBufferCount];
     bool mInPreviewCallback;
     bool mCameraRecording;
+    int32_t mCurZoom;
 };
 
 }; // namespace android
