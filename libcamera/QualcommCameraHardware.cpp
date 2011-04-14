@@ -223,6 +223,20 @@ static const str_map flashmode[] = {
 };
 static char *flashmode_values;
 
+static const str_map picturesize[] = {
+	    { "2560x1920", 0 },// max res, cannot zoom
+	    { "2048x1536", 2 },// 2 ok, 3 broken
+	    { "1600x1200", 4 },// 4 ok, 5 broken
+	    { "1280x960", 6 }, // 6 ok, 7 broken
+	    { "640x480", 11 }, // 11 ok, 12 broken
+	    { "320x240", 11 }, // 11 ok, 12 broken
+	    { "352x288", 10 }, // 10 ok, 11 broken
+	    { "176x144", 16 }, // 16 ok, 17 broken
+	    { NULL, 0 }
+};
+
+static char *picturesize_values;
+
 // round to the next power of two
 static inline unsigned clp2(unsigned x)
 {
@@ -251,6 +265,9 @@ struct msm_frame_t *frameA;
 bool bFramePresent;
 pthread_t w_thread;
 pthread_t jpegThread;
+//Zoom
+static int32_t mMaxZoom = -1;
+static bool zoomSupported = false;
 
 void *opencamerafd(void *arg) {
     camerafd = open(MSM_CAMERA_CONTROL, O_RDWR);
@@ -285,7 +302,8 @@ QualcommCameraHardware::QualcommCameraHardware()
       mAutoFocusThreadRunning(false),
       mAutoFocusFd(-1),
       mInPreviewCallback(false),
-      mCameraRecording(false)
+      mCameraRecording(false),
+      mCurZoom(0)
 {
     LOGV("constructor E");
     if((pthread_create(&w_thread, NULL, opencamerafd, NULL)) != 0) {
@@ -319,18 +337,25 @@ void QualcommCameraHardware::initDefaultParameters()
     p.set(CameraParameters::KEY_WHITE_BALANCE, CameraParameters::WHITE_BALANCE_AUTO);
     p.set(CameraParameters::KEY_FLASH_MODE, CameraParameters::FLASH_MODE_AUTO);
 
+    // Zoom parameters
+    p.set(CameraParameters::KEY_ZOOM_SUPPORTED, "true");
+    p.set(CameraParameters::KEY_ZOOM, "0");
+    p.set(CameraParameters::KEY_MAX_ZOOM, 5);
+    p.set(CameraParameters::KEY_ZOOM_RATIOS, "100,150,175,200,250,300");
+
     // This will happen only once in the lifetime of the mediaserver process.
     // We do not free the _values arrays when we destroy the camera object.
     INIT_VALUES_FOR(antibanding);
     INIT_VALUES_FOR(effect);
     INIT_VALUES_FOR(whitebalance);
     INIT_VALUES_FOR(flashmode);
+    INIT_VALUES_FOR(picturesize);
 
     p.set(CameraParameters::KEY_SUPPORTED_ANTIBANDING, antibanding_values);
     p.set(CameraParameters::KEY_SUPPORTED_EFFECTS, effect_values);
     p.set(CameraParameters::KEY_SUPPORTED_WHITE_BALANCE, whitebalance_values);
     p.set(CameraParameters::KEY_SUPPORTED_FLASH_MODES, flashmode_values);
-    p.set(CameraParameters::KEY_SUPPORTED_PICTURE_SIZES, "320x240,480x320,640x480,1280x960,1600x1200,2048x1536,2560x1920");
+    p.set(CameraParameters::KEY_SUPPORTED_PICTURE_SIZES, "320x240,640x480,1280x960,1600x1200,2048x1536,2560x1920");
     p.set(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES, "176x144,320x240,352x288,480x320");
 
     if (setParameters(p) != NO_ERROR) {
@@ -572,6 +597,30 @@ void QualcommCameraHardware::native_unregister_preview_bufs(
                   MSM_PMEM_OUTPUT2,
                   true,
                   true);
+}
+
+static bool native_get_maxzoom(int camfd, void *pZm)
+{
+    LOGV("native_get_maxzoom E");
+
+    struct msm_ctrl_cmd_t ctrlCmd;
+    int32_t *pZoom = (int32_t *)pZm;
+
+    ctrlCmd.type       = CAMERA_GET_PARM_MAXZOOM;
+    ctrlCmd.timeout_ms = 5000;
+    ctrlCmd.length     = sizeof(int32_t);
+    ctrlCmd.value      = pZoom;
+
+    if (ioctl(camfd, MSM_CAM_IOCTL_CTRL_COMMAND, &ctrlCmd) < 0) {
+        LOGE("native_get_maxzoom: ioctl fd %d error %s", camfd, strerror(errno));
+        return false;
+    }
+
+    LOGV("MaxZoom value is %d", *(int32_t *)ctrlCmd.value);
+    memcpy(pZoom, (int32_t *)ctrlCmd.value, sizeof(int32_t));
+
+    LOGV("native_get_maxzoom X");
+    return true;
 }
 
 static bool native_set_afmode(int camfd, isp3a_af_mode_t af_type)
@@ -1567,6 +1616,51 @@ status_t QualcommCameraHardware::cancelAutoFocus()
     return NO_ERROR;
 }
 
+
+void QualcommCameraHardware::setZoom()
+{
+    int32_t level;
+    int32_t multiplier;
+    if(native_get_maxzoom(mCameraControlFd,
+            (void *)&mMaxZoom) == true){
+        LOGD("Maximum zoom value is %d", mMaxZoom);
+        //maxZoom/5 in the ideal world, but it's stuck on 90
+        multiplier = getParm("picture-size", picturesize);
+
+        //Camcorder mode uses preview size
+        if (strcmp(mParameters.get("preview-frame-rate"),"15") != 0)
+            multiplier = getParm("preview-size", picturesize);
+
+        zoomSupported = true;
+        if(mMaxZoom > 0){
+            level = mParameters.getInt(CameraParameters::KEY_ZOOM) * multiplier;
+        }
+    } else {
+        zoomSupported = false;
+        LOGE("Failed to get maximum zoom value...setting max "
+                "zoom to zero");
+        mMaxZoom = 0;
+    }
+
+    if (level >= mMaxZoom) {
+        level = mMaxZoom;
+    }
+
+    LOGV("Set Zoom level: %d current: %d maximum: %d", level, mCurZoom, mMaxZoom);
+
+    if (level == mCurZoom) {
+        return;
+    }
+
+   if (level != -1) {
+            LOGV("Final Zoom Level: %d", level);
+            if (level >= 0 && level <= mMaxZoom) {
+                native_set_parm(CAMERA_SET_PARM_ZOOM, sizeof(level), (void *)&level);
+                mCurZoom = level;
+            }
+    }
+}
+
 void *auto_focus_thread(void *user)
 {
     sp<QualcommCameraHardware> obj = QualcommCameraHardware::getInstance();
@@ -1674,6 +1768,8 @@ status_t QualcommCameraHardware::takePicture()
                                              NULL);
     mSnapshotThreadWaitLock.unlock();
 
+    setZoom();
+
     LOGV("takePicture: X");
     return mSnapshotThreadRunning ? NO_ERROR : UNKNOWN_ERROR;
 }
@@ -1706,6 +1802,8 @@ void QualcommCameraHardware::initCameraParameters()
 
     value = getParm("flash-mode", flashmode);
     SET_PARM(CAMERA_SET_PARM_LED_MODE, value);
+
+    setZoom();
 
 #undef SET_PARM
 
@@ -1772,7 +1870,8 @@ status_t QualcommCameraHardware::setParameters(
     mParameters = params;
 
     // Effect, WhiteBalance, AntiBanding...
-    initCameraParameters();
+    if (mCameraControlFd != -1)
+        initCameraParameters();
 
     LOGV("setParameters: X");
     return NO_ERROR;
