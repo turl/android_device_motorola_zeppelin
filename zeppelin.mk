@@ -75,6 +75,7 @@ PRODUCT_PACKAGES += \
     gralloc.msm7k \
     copybit.zeppelin \
     librpc \
+    libstagefrighthw \
     libOmxCore \
     libmm-omxcore \
     libloc_api-rpc \
@@ -108,6 +109,8 @@ LOCAL_KERNEL := device/motorola/zeppelin/kernel
 else
 LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
 endif
+
+TARGET_PREBUILT_RECOVERY_KERNEL := device/motorola/zeppelin/recovery_kernel
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_KERNEL):kernel \
