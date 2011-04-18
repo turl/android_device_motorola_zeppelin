@@ -103,3 +103,5 @@ BOARD_HAS_VIBRATOR_IMPLEMENTATION := ../../device/motorola/zeppelin/vibrator.c
 # Recovery
 BOARD_RECOVERY_WRITE_MISC := true
 BOARD_CUSTOM_RECOVERY_KEYMAPPING:= ../../device/motorola/zeppelin/recovery/recovery_ui.c
+
+TARGET_PREBUILT_RECOVERY_KERNEL := device/motorola/zeppelin/recovery_kernel
