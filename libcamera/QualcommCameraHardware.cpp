@@ -1477,6 +1477,7 @@ void QualcommCameraHardware::stopPreview()
 void QualcommCameraHardware::runAutoFocus()
 {
     int status = false;
+    led_mode_t value;
 
     mAutoFocusThreadLock.lock();
     mAutoFocusFd = open(MSM_CAMERA_CONTROL, O_RDWR);
@@ -1489,13 +1490,23 @@ void QualcommCameraHardware::runAutoFocus()
         return;
     }
 
-    // firesnatch 04/16/2011 - slight delay needed here to make barcode scanning work
-	usleep(100000);
+    // slight delay needed here to make barcode scanning work
+    usleep(100000);
 
     /* This will block until either AF completes or is cancelled. */
     native_set_afmode(camerafd, AF_MODE_MACRO);
     if (native_get_af_result(camerafd) == 0) {
         status = true;
+    }
+
+    // native_set_afmode turns off LED light for some reason.
+    // Need to toggle it to get it back on.
+    value = (led_mode_t) getParm("flash-mode", flashmode);
+    if (value == LED_MODE_ON) {
+        value = LED_MODE_OFF;
+        native_set_parm(CAMERA_SET_PARM_LED_MODE, sizeof(value), (void *)&value);
+        value = LED_MODE_ON;
+        native_set_parm(CAMERA_SET_PARM_LED_MODE, sizeof(value), (void *)&value);
     }
 
     mAutoFocusThreadRunning = false;
@@ -2406,5 +2417,6 @@ status_t QualcommCameraHardware::sendCommand(int32_t command, int32_t arg1,
 }
 
 }; // namespace android
+
 
 
