@@ -87,9 +87,10 @@ adb pull /system/lib/libomx_sharedlibrary_qc.so ../../../vendor/motorola/$DEVICE
 adb pull /system/lib/libomx_wmadec_sharedlibrary.so ../../../vendor/motorola/$DEVICE/proprietary
 #adb pull /system/lib/libOmxCore.so ../../../vendor/motorola/$DEVICE/proprietary
 adb pull /system/lib/libOmxH264Dec.so ../../../vendor/motorola/$DEVICE/proprietary
-#adb pull /system/lib/libOmxMp3Dec.so ../../../vendor/motorola/$DEVICE/proprietary
+adb pull /system/lib/libOmxMp3Dec.so ../../../vendor/motorola/$DEVICE/proprietary
 adb pull /system/lib/libOmxMpeg4Dec.so ../../../vendor/motorola/$DEVICE/proprietary
 adb pull /system/lib/libOmxVidEnc.so ../../../vendor/motorola/$DEVICE/proprietary
+adb pull /system/lib/libmm-adspsvc.so ../../../vendor/motorola/$DEVICE/proprietary
 adb pull /system/lib/libomx_wmvdec_sharedlibrary.so ../../../vendor/motorola/$DEVICE/proprietary
 
 adb pull /system/lib/libopencore_motlocal.so ../../../vendor/motorola/$DEVICE/proprietary
@@ -251,7 +252,9 @@ PRODUCT_COPY_FILES += \\
     vendor/motorola/__DEVICE__/proprietary/libomx_wmvdec_sharedlibrary.so:/system/lib/libomx_wmvdec_sharedlibrary.so \\
     vendor/motorola/__DEVICE__/proprietary/libOmxH264Dec.so:/system/lib/libOmxH264Dec.so \\
     vendor/motorola/__DEVICE__/proprietary/libOmxMpeg4Dec.so:/system/lib/libOmxMpeg4Dec.so \\
+    vendor/motorola/__DEVICE__/proprietary/libOmxMp3Dec.so:/system/lib/libOmxMp3Dec.so \\
     vendor/motorola/__DEVICE__/proprietary/libOmxVidEnc.so:/system/lib/libOmxVidEnc.so \\
+    vendor/motorola/__DEVICE__/proprietary/libmm-adspsvc.so:/system/lib/libmm-adspsvc.so \\
     vendor/motorola/__DEVICE__/proprietary/libopencore_motlocal.so:/system/lib/libopencore_motlocal.so \\
     vendor/motorola/__DEVICE__/proprietary/libopencore_motlocalreg.so:/system/lib/libopencore_motlocalreg.so \\
     vendor/motorola/__DEVICE__/proprietary/libspeech.so:/system/lib/libspeech.so \\
