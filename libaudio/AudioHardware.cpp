@@ -22,7 +22,7 @@
 #include <math.h>
 
 #define LOG_NDEBUG 0 
-#define LOG_NDDEBUG 0
+//#define LOG_NDDEBUG 0
 #define LOG_NIDEBUG 0
 #define LOG_TAG "AudioHardwareMSM72XX"
 #include <utils/Log.h>
@@ -39,7 +39,7 @@
 #define MOT_FEATURE_PLATFORM_ANDROID 1
 
 // hardware specific functions
-// Motorola - Morrison volrange is 0-15
+// Motorola - Zeppelin volrange is 0-15
 #define AMSS_VOL_FACTOR 15.0
 
 #include <media/AudioSystem.h>
@@ -70,15 +70,12 @@ static uint16_t eq_flag;
 static uint16_t rx_iir_flag[3];
 static bool audpp_filter_inited = false;
 
-
 #define PCM_OUT_DEVICE "/dev/msm_pcm_out"
 #define PCM_IN_DEVICE "/dev/msm_pcm_in"
 #define PCM_CTL_DEVICE "/dev/msm_pcm_ctl"
 #define VOICE_MEMO_DEVICE "/dev/msm_voicememo"
 
-
 static int m7xSndDrvFd = -1;
-
 
 const uint32_t AudioHardware::inputSamplingRates[] = {
         8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000
@@ -110,7 +107,7 @@ AudioHardware::AudioHardware() :
     SND_DEVICE_HEADSET_MOS(-1)
 {
 
-    LOGI("libaudio Cliq XT v1.0.9 beta7 by firesnatch & turl (%s)", __DATE__);
+    LOGI("libaudio Cliq XT by firesnatch & turl (%s)", __DATE__);
     if (get_audpp_filter() == 0)
         audpp_filter_inited = true;
         LOGD("start AudioHardware");
@@ -289,13 +286,12 @@ status_t AudioHardware::setMode(int mode)
         // make sure that doAudioRouteOrMute() is called by doRouting()
         // even if the new device selected is the same as current one.
 	clearCurDevice();
-        if (mode == AudioSystem::MODE_NORMAL && mPrevMode == AudioSystem::MODE_RINGTONE){// && (mOutput->devices() & AudioSystem::DEVICE_OUT_WIRED_H$
+        if (mode == AudioSystem::MODE_NORMAL && mPrevMode == AudioSystem::MODE_RINGTONE) {
                 // firesnatch 3/27/2011 - work-around for sound going from 
                 // headphones to speaker after missed call
                 LOGI("setMode() aborted call workaround");
                 doRouting(NULL);
-        } // end if*/
-
+        }
     }
     mPrevMode = mode;
     return status;
@@ -343,48 +339,8 @@ status_t AudioHardware::setParameters(const String8& keyValuePairs)
     const char BT_NREC_KEY[] = "bt_headset_nrec";
     const char BT_NAME_KEY[] = "bt_headset_name";
     const char BT_NREC_VALUE_ON[] = "on";
-    const char TOGGLE_MUTE_KEY[] = "toggle";
 
     if (keyValuePairs.length() == 0) return BAD_VALUE;
-
-    /* firesnatch 2/25/2011 - CliqXT mute toggle trick */
-    key = String8(TOGGLE_MUTE_KEY);
-    if (param.get(key, value) == NO_ERROR) {
-        { // begin lock scope
-        Mutex::Autolock lock(mLock);
-#if 0
-        switch (mMode) {
-	   case -2: LOGD("[[TOGGLE MUTE]] mMode=MODE_INVALID"); break;
-	   case -1: LOGD("[[TOGGLE MUTE]] mMode=MODE_CURRENT"); break;
-	   case  0: LOGD("[[TOGGLE MUTE]] mMode=MODE_NORMAL"); break;
-	   case  1: LOGD("[[TOGGLE MUTE]] mMode=MODE_RINGTONE"); break;
-	   case  2: LOGD("[[TOGGLE MUTE]] mMode=MODE_IN_CALL"); break;
-	}
-#endif 
-        if (mMode == AudioSystem::MODE_IN_CALL && mCurSndDevice != -1) {
-            LOGI("setParameters() [[TOGGLE MUTE]] mMode=%d, mCurSndDevice=%d, mMicMute=%d", mMode, mCurSndDevice, mMicMute);
-
-            args.device = mCurSndDevice;
-            args.ear_mute = 0;
-            args.mic_mute = !mMicMute;
-            ioctl(m7xSndDrvFd, SND_SET_DEVICE, &args);
-
-            usleep(2000); // slight delay, not sure if this is needed
-
-            args.device = mCurSndDevice;
-            args.ear_mute = 0;
-            args.mic_mute = mMicMute;
-            ioctl(m7xSndDrvFd, SND_SET_DEVICE, &args);
-
-            iLastMode = mMode;
-            return NO_ERROR;
-
-        } // end if
-        } // end lock scope
-
-        iLastMode = mMode;
-        return NO_ERROR;
-    }
 
     LOGI("setParameters() [A] %s", keyValuePairs.string());
 
@@ -927,9 +883,10 @@ status_t AudioHardware::doAudioRouteOrMute(int device)
                               device, ear_mute, mMicMute);
 
 }
+
 //
 // MOT_LV
-// MORRISON/MOTUS - new function
+// ZEPPELIN - new function
 int AudioHardware::getHeadsetType()
 {
 
@@ -938,10 +895,9 @@ int AudioHardware::getHeadsetType()
   char buf[20];
   char buf1[20];
   int  hs_type = SND_DEVICE_HEADSET;
- 
 
     /* firesnatch 12/30/2010 */
-    /* On the Cliq XT, the file seems to be in a different location */
+    /* Changed path for the Cliq XT */
     fd1 = open("/sys/devices/virtual/switch/hs/state", O_RDONLY);
     if (fd1 < 0) {
       	LOGE("getHeadsetType() Cannot open state file");
@@ -967,10 +923,8 @@ int AudioHardware::getHeadsetType()
     return (hs_type );
 }
 
-
 status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input)
 {
- 
     Mutex::Autolock lock(mLock);
     uint32_t outputDevices = mOutput->devices();
     status_t ret = NO_ERROR;
@@ -1031,7 +985,7 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input)
         }
         LOGI("Aks [output] doRouting, mTtyMode=%d outputdevices=0x%x mode=%d", mTtyMode, outputDevices, mMode);
 
-        if ((mTtyMode != TTY_OFF) /* && (mMode == AudioSystem::MODE_IN_CALL) */ &&
+        if ((mTtyMode != TTY_OFF) &&
             (outputDevices & (DEVICE_OUT_TTY | AudioSystem::DEVICE_OUT_WIRED_HEADSET | AudioSystem::DEVICE_OUT_WIRED_HEADPHONE))) {
             if (mTtyMode == TTY_FULL) {
                 LOGI("Routing audio to TTY FULL Mode\n");
@@ -1723,5 +1677,4 @@ extern "C" AudioHardwareInterface* createAudioHardware(void) {
 }
 
 }; // namespace android
-
 
