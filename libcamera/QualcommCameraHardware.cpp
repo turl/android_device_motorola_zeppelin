@@ -199,6 +199,7 @@ static const str_map picturesize[] = {
 	    { "1600x1200", 4 },// 4 ok, 5 broken
 	    { "1280x960", 6 }, // 6 ok, 7 broken
 	    { "640x480", 11 }, // 11 ok, 12 broken
+	    { "480x320",  8 }, // 8 ok, 9 broken
 	    { "320x240", 11 }, // 11 ok, 12 broken
 	    { "352x288", 10 }, // 10 ok, 11 broken
 	    { "176x144", 16 }, // 16 ok, 17 broken
