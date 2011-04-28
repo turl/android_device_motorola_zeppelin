@@ -1331,6 +1331,7 @@ void QualcommCameraHardware::release()
 
     int rc;
     struct msm_ctrl_cmd_t ctrlCmd;
+    led_mode_t value;
 
     if (mCameraRunning) {
         if (mMsgEnabled & CAMERA_MSG_VIDEO_FRAME) {
@@ -1343,6 +1344,10 @@ void QualcommCameraHardware::release()
     }
 
     if (mRawInitialized) deinitRaw();
+
+    // Turn off LED just in case it was left on
+    value = LED_MODE_AUTO;
+    native_set_parm(CAMERA_SET_PARM_LED_MODE, sizeof(value), (void *)&value);
 
     LOGV("CAMERA_EXIT");
 
