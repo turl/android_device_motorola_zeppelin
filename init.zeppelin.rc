@@ -141,7 +141,7 @@ service minipadut /system/bin/minipadut -all /data/minipad.log
     class HW
     oneshot
 
-service dhcpcd /system/bin/dhcpcd -ABKL -d eth0
+service dhcpcd_eth0 /system/bin/dhcpcd -ABKL -d eth0
     class WLAN
     #user system  #- this makes socket() calls fail with permission denied
     group dhcp
