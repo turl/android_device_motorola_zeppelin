@@ -45,7 +45,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
         ro.url.legal.android_privacy=http://www.google.com/intl/%s/mobile/android/basic/privacy.html \
         ro.config.vc_call_vol_steps=7 \
         ro.telephony.call_ring.multiple=false \
-        ro.telephony.call_ring.delay=4000 \
+        ro.telephony.call_ring.delay=1000 \
         ro.url.safetylegal=http://www.motorola.com/staticfiles/Support/legal/?model=MB501 \
         ro.setupwizard.enable_bypass=1 \
         dalvik.vm.lockprof.threshold=500 \
