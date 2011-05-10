@@ -112,10 +112,10 @@
 	_IOW(MSM_CAM_IOCTL_MAGIC, 24, struct msm_ctrl_cmd_t *)
 
 #define MSM_CAM_IOCTL_AF_CTRL \
-	_IOR(MSM_CAM_IOCTL_MAGIC, 25, struct msm_ctrl_cmt_t *)
+	_IOR(MSM_CAM_IOCTL_MAGIC, 25, struct msm_ctrl_cmd_t *)
 
 #define MSM_CAM_IOCTL_AF_CTRL_DONE \
-	_IOW(MSM_CAM_IOCTL_MAGIC, 26, struct msm_ctrl_cmt_t *)
+	_IOW(MSM_CAM_IOCTL_MAGIC, 26, struct msm_ctrl_cmd_t *)
 
 #define MSM_CAM_IOCTL_DISABLE_LENS_MOVE \
          _IOW(MSM_CAM_IOCTL_MAGIC, 100, uint8_t*)
