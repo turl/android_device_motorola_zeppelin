@@ -6,9 +6,9 @@ rild.libpath = /system/lib/libril-qc-1.so
 rild.libargs = -d /dev/smd0
 
 android.keylayout.adp5588_zeppelin = /system/usr/keylayout/adp5588_zeppelin.kl
-android.keychar.adp5588_zeppelin = /system/usr/keychars/adp5588_zeppelin.kl
-android.keylayout.headphone = /system/usr/keylayout/headphone.kl
-android.keychar.headphone = /system/usr/keychars/headphone.kcm
+android.keychar.adp5588_zeppelin = /system/usr/keychars/adp5588_zeppelin.kcm.bin
+android.keylayout.headphone = /system/usr/keylayout/headset.kl
+android.keychar.headphone = /system/usr/keychars/headset.kcm.bin
 
 wifi.interface = eth0
 # Time between scans in seconds. Keep it high to minimize battery drain.
