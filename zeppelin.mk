@@ -86,7 +86,8 @@ PRODUCT_PACKAGES += \
     libcamera \
     libaudio \
     rzscontrol \
-    dexpreopt
+    dexpreopt \
+    setrecovery
 
 DISABLE_DEXPREOPT := false
 
@@ -109,6 +110,9 @@ LOCAL_KERNEL := device/motorola/zeppelin/kernel
 else
 LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
 endif
+
+PRODUCT_COPY_FILES += \
+    device/motorola/zeppelin/setrecovery/prebuilt:recovery/root/sbin/setrecovery
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_KERNEL):kernel \

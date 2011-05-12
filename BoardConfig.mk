@@ -102,7 +102,7 @@ TARGET_PROVIDES_LIBAUDIO := true
 BOARD_HAS_VIBRATOR_IMPLEMENTATION := ../../device/motorola/zeppelin/vibrator.c
 
 # Recovery
-TARGET_RECOVERY_WRITE_MISC_PART := 3
+TARGET_RECOVERY_PRE_COMMAND := "setrecovery recovery"
 BOARD_CUSTOM_RECOVERY_KEYMAPPING:= ../../device/motorola/zeppelin/recovery/recovery_ui.c
 
 TARGET_PREBUILT_RECOVERY_KERNEL := device/motorola/zeppelin/recovery_kernel
