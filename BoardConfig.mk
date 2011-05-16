@@ -80,6 +80,9 @@ BOARD_HAVE_BLUETOOTH_BCM := true
 #BOARD_USERDATAIMAGE_PARTITION_SIZE := 0x0bf00000
 #BOARD_FLASH_BLOCK_SIZE := 131072
 
+# System
+WITH_DEXPREOPT := true
+
 # Graphics
 # Use RGB565 surfaces until userspace drivers are upgraded
 BOARD_NO_RGBX_8888 := true
