@@ -280,6 +280,7 @@ QualcommCameraHardware::QualcommCameraHardware()
     }
     memset(&mDimension, 0, sizeof(mDimension));
     memset(&mCrop, 0, sizeof(mCrop));
+    mAFenabled = false;
     LOGV("constructor X");
 }
 
@@ -298,7 +299,7 @@ void QualcommCameraHardware::initDefaultParameters()
     p.set("jpeg-quality", "100"); // maximum quality
     p.set("jpeg-thumbnail-width", THUMBNAIL_WIDTH_STR); // informative
     p.set("jpeg-thumbnail-height", THUMBNAIL_HEIGHT_STR); // informative
-    p.set("jpeg-thumbnail-quality", "85");
+    p.set("jpeg-thumbnail-quality", "40");
 
     p.setPictureSize(DEFAULT_PICTURE_WIDTH, DEFAULT_PICTURE_HEIGHT);
     p.set(CameraParameters::KEY_ANTIBANDING, CameraParameters::ANTIBANDING_OFF);
@@ -867,7 +868,7 @@ static void *cam_frame_click(void *data)
             pthread_mutex_unlock(&mutex_camframe);
         } else {
             LOGV("frame is not ready! select returns %d", ret);
-            usleep(100000);
+            usleep(100);
         }
     }
 
@@ -1455,6 +1456,8 @@ void QualcommCameraHardware::stopPreviewInternal()
             cancelAutoFocus();
         }
 
+        mAFenabled = false;
+
         LOGV("Stopping preview");
         mCameraRunning = !native_stop_preview(mCameraControlFd);
         if (!mCameraRunning && mPreviewInitialized) {
@@ -1496,13 +1499,13 @@ void QualcommCameraHardware::runAutoFocus()
         return;
     }
 
-    // slight delay needed here to make barcode scanning work
-    usleep(100000);
-
-    /* This will block until either AF completes or is cancelled. */
-    native_set_afmode(camerafd, AF_MODE_MACRO);
-    if (native_get_af_result(camerafd) == 0) {
-        status = true;
+    // Autofocusing when preview isn't showing breaks it
+    if(mAFenabled) {
+        /* This will block until either AF completes or is cancelled. */
+        native_set_afmode(camerafd, AF_MODE_MACRO);
+        if (native_get_af_result(camerafd) == 0) {
+            status = true;
+        }
     }
 
     // native_set_afmode turns off LED light for some reason.
@@ -1831,6 +1834,9 @@ void QualcommCameraHardware::receivePreviewFrame(struct msm_frame_t *frame)
 
     if ( LOG_PREVIEW )
         LOGV("receivePreviewFrame X");
+
+    if (!mAFenabled)
+        mAFenabled = true;
 }
 
 status_t QualcommCameraHardware::startRecording()

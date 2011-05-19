@@ -438,6 +438,7 @@ private:
     bool mInPreviewCallback;
     bool mCameraRecording;
     int32_t mCurZoom;
+    bool mAFenabled;
 };
 
 }; // namespace android
