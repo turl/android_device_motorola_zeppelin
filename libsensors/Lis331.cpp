@@ -79,10 +79,8 @@ int LisSensor::enable(int32_t handle, int en)
     }
 
     int newState = en ? 1 : 0;
-    unsigned long flags = newState;
-    
+
     int sAccelModeFD = open(ACCEL_MODE_NAME, O_RDWR);
-    //err = ioctl(dev_fd, LIS331DLH_IOCTL_SET_ENABLE, &flags);
     err = write(sAccelModeFD, "1 s 4g", 6); //s=slow, m=medium, h=high
     err = err < 0 ? -errno : 0;
     close(sAccelModeFD);
@@ -91,7 +89,7 @@ int LisSensor::enable(int32_t handle, int en)
 
     if (!err) {
         mEnabled = newState;
-        setDelay(0, 100000000); // 100ms by default for faster re-orienting
+        //setDelay(0, 100000000); // 100ms by default for faster re-orienting
     }
     if (!mEnabled) {
         close_device();
@@ -106,9 +104,19 @@ int LisSensor::setDelay(int32_t handle, int64_t ns)
             return -EINVAL;
 
         unsigned long delay = ns / 1000000;
-        if (ioctl(dev_fd, LIS331DLH_IOCTL_SET_DELAY, &delay)) {
-            return -errno;
-        }
+        LOGE("Setting delay to %d", delay);
+
+        char *towrite;
+        if (delay <= 20)
+            towrite = "1 h 4g"; //2.5ms delay
+        else if (delay > 20 && delay <= 100)
+            towrite = "1 m 4g"; //20ms delay
+        else //if (delay > 100)
+            towrite = "1 s 4g"; //100ms delay, default
+
+        int sAccelModeFD = open(ACCEL_MODE_NAME, O_RDWR);
+        write(sAccelModeFD, towrite, 6);
+        close(sAccelModeFD);
     }
     return 0;
 }
