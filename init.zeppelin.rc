@@ -148,6 +148,11 @@ service dhcpcd_eth0 /system/bin/dhcpcd -ABKL -d eth0
     disabled
     oneshot
 
+service iprenew_eth0 /system/bin/dhcpcd -n
+    group dhcp
+    disabled
+    oneshot
+
 service autoip /system/bin/dhcpcd -B -d eth0
     class WLAN
     #user system  #- this makes socket() calls fail with permission denied
