@@ -43,6 +43,7 @@ TARGET_OTA_ASSERT_DEVICE := zepp,zeppelin
 TARGET_PREBUILT_KERNEL := device/motorola/zeppelin/kernel
 BOARD_KERNEL_CMDLINE := no_console_suspend=1 console=null quiet
 BOARD_USE_USB_MASS_STORAGE_SWITCH := true
+BOARD_CUSTOM_USB_CONTROLLER := ../../device/motorola/zeppelin/UsbController.cpp
 
 # FM Radio
 BOARD_HAVE_FM_RADIO := true
