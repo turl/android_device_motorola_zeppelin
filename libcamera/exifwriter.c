@@ -122,7 +122,7 @@ static void dump_to_file(const char *fname,
 }
 
 void writeExif( void *origData, void *destData , int origSize , uint32_t *resultSize, int orientation,camera_position_type  *pt ) {
-  const char *filename = "/data/temp.jpg";
+  const char *filename = "/cache/tmp/temp.jpg";
 
     dump_to_file( filename, (uint8_t *)origData, origSize );
     LOGV("WRITE EXIF Filename %s", filename);
