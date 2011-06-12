@@ -17,6 +17,10 @@
 #define TAG_ORIENTATION            0x0112
 #define TAG_MAKE                   0x010F
 #define TAG_MODEL                  0x0110
+#define TAG_IMAGE_WIDTH            0x0100
+#define TAG_IMAGE_LENGTH           0x0101
+#define TAG_EXIF_VERSION           0x9000
+#define EXIF_TOTAL_DATA 2
 
 
 float *float2degminsec( float deg )
@@ -144,7 +148,7 @@ void writeExif( void *origData, void *destData , int origSize , uint32_t *result
     }
 
 
-    ExifElement_t *t = (ExifElement_t *)malloc( sizeof(ExifElement_t)*(3+gpsTag) );
+    ExifElement_t *t = (ExifElement_t *)malloc( sizeof(ExifElement_t)*(EXIF_TOTAL_DATA+gpsTag) );
 
     ExifElement_t *it = t;
     // Store file date/time.
@@ -154,11 +158,11 @@ void writeExif( void *origData, void *destData , int origSize , uint32_t *result
     unsigned short v;
     LOGV("EXIF Orientation %d", orientation);
     if( orientation == 90 ) {
-        (*it).Value = "6";
+        (*it).Value = "6\0";
     } else if( orientation == 180 ) {
-        (*it).Value = "3";
+        (*it).Value = "3\0";
     } else {
-        (*it).Value = "1";
+        (*it).Value = "1\0";
     }
     (*it).GpsTag = FALSE;
 
@@ -166,7 +170,7 @@ void writeExif( void *origData, void *destData , int origSize , uint32_t *result
 
     (*it).Tag = TAG_MAKE;
     (*it).Format = FMT_STRING;
-    (*it).Value = "Motorola";
+    (*it).Value = "Motorola\0";
     (*it).DataLength = strlen((*it).Value);
     (*it).GpsTag = FALSE;
 
@@ -174,7 +178,7 @@ void writeExif( void *origData, void *destData , int origSize , uint32_t *result
 
     (*it).Tag = TAG_MODEL;
     (*it).Format = FMT_STRING;
-    (*it).Value = "MB501 with CyanogenMOD";
+    (*it).Value = "MB501 with CyanogenMOD\0";
     (*it).DataLength = strlen((*it).Value);
     (*it).GpsTag = FALSE;
 
@@ -188,70 +192,61 @@ void writeExif( void *origData, void *destData , int origSize , uint32_t *result
         (*it).Tag = 0x01;
         (*it).Format = FMT_STRING;
         if( pt->latitude > 0 ) {
-            (*it).Value = "N";
+            (*it).Value = "N\0";
         } else {
-            (*it).Value = "S";
+            (*it).Value = "S\0";
         }
         (*it).DataLength = 2;
         (*it).GpsTag = TRUE;
 
         it++;
-        char *mylat = coord2degminsec( pt->latitude );
-        LOGV("writeExif: latitude is: %s", mylat);
+        (*it).Value = coord2degminsec( pt->latitude );
+        LOGV("writeExif: latitude is: %s", (*it).Value);
 
         (*it).Tag = 0x02;
         (*it).Format = FMT_URATIONAL;
-        (*it).Value = mylat;
         (*it).DataLength = 3;
         (*it).GpsTag = TRUE;
-        free( mylat );
 
         it++;
         (*it).Tag = 0x03;
         (*it).Format = FMT_STRING;
         if( (*pt).longitude > 0 ) {
-            (*it).Value = "E";
+            (*it).Value = "E\0";
         } else {
-            (*it).Value = "W";
+            (*it).Value = "W\0";
         }
         (*it).DataLength = 2;
         (*it).GpsTag = TRUE;
 
         it++;
-        char *mylong = coord2degminsec( (*pt).longitude );
-        LOGV("writeExif: longitude is: %s", mylong);
+        (*it).Value = coord2degminsec( pt->longitude );
+        LOGV("writeExif: longitude is: %s", (*it).Value);
 
         (*it).Tag = 0x04;
         (*it).Format = FMT_URATIONAL;
-        (*it).Value = mylong;
         (*it).DataLength = 3;
         (*it).GpsTag = TRUE;
-
-        free( mylong );
 
         it++;
         (*it).Tag = 0x05;
         (*it).Format = FMT_USHORT;
         if( (*pt).altitude > 0 ) {
-            (*it).Value = "0";
+            (*it).Value = "0\0";
         } else {
-            (*it).Value = "1";
+            (*it).Value = "1\0";
         }
         (*it).DataLength = 1;
         (*it).GpsTag = TRUE;
 
         it++;
-        char *myalt = float2rationnal( fabs( (*pt).altitude ) );
-        LOGV("writeExif: altitude is: %s", myalt);
+        (*it).Value = float2rationnal( fabs( pt->altitude ) );
+        LOGV("writeExif: altitude is: %s", (*it).Value);
 
         (*it).Tag = 0x06;
         (*it).Format = FMT_SRATIONAL;
-        (*it).Value = myalt;
         (*it).DataLength = 1;
         (*it).GpsTag = TRUE;
-
-        free( myalt );
-
     }
 
    {
@@ -270,7 +265,7 @@ void writeExif( void *origData, void *destData , int origSize , uint32_t *result
     int res = ReadJpegFile(filename, (ReadMode_t)ReadMode );
     LOGV("READ EXIF Filename %s", filename);
 
-    create_EXIF( t, 3, gpsTag);
+    create_EXIF( t, EXIF_TOTAL_DATA, gpsTag);
 
     WriteJpegFile(filename);
     chmod( filename, S_IRWXU );
@@ -284,6 +279,8 @@ void writeExif( void *origData, void *destData , int origSize , uint32_t *result
     fseek( src, 0L, SEEK_SET );
 
     int read = fread( destData, 1, (*resultSize), src );
+
+    free( t );
 
     unlink( filename );
 }
