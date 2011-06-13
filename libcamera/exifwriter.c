@@ -19,8 +19,10 @@
 #define TAG_MODEL                  0x0110
 #define TAG_IMAGE_WIDTH            0x0100
 #define TAG_IMAGE_LENGTH           0x0101
+#define TAG_FLASH                  0x9209
+#define TAG_WHITEBALANCE           0xA403
 #define TAG_EXIF_VERSION           0x9000
-#define EXIF_TOTAL_DATA 2
+#define EXIF_TOTAL_DATA 5
 
 
 float *float2degminsec( float deg )
@@ -125,7 +127,7 @@ static void dump_to_file(const char *fname,
     close(fd);
 }
 
-void writeExif( void *origData, void *destData , int origSize , uint32_t *resultSize, int orientation,camera_position_type  *pt ) {
+void writeExif( void *origData, void *destData , int origSize , uint32_t *resultSize, int orientation,camera_position_type  *pt, int wb, int ledm ) {
   const char *filename = "/cache/tmp/temp.jpg";
 
     dump_to_file( filename, (uint8_t *)origData, origSize );
@@ -135,9 +137,7 @@ void writeExif( void *origData, void *destData , int origSize , uint32_t *result
 
 
     memset(&ImageInfo, 0, sizeof(ImageInfo));
-    ImageInfo.FlashUsed = -1;
     ImageInfo.MeteringMode = -1;
-    ImageInfo.Whitebalance = -1;
 
     int gpsTag = 0;
     if( pt != NULL ) {
@@ -182,6 +182,21 @@ void writeExif( void *origData, void *destData , int origSize , uint32_t *result
     (*it).DataLength = strlen((*it).Value);
     (*it).GpsTag = FALSE;
 
+    it++;
+
+    (*it).Tag = TAG_FLASH;
+    (*it).Format = FMT_USHORT;
+    (*it).Value = (ledm ? "1\0" : "0\0");
+    (*it).DataLength = 1;
+    (*it).GpsTag = FALSE;
+
+    it++;
+
+    (*it).Tag = TAG_WHITEBALANCE;
+    (*it).Format = FMT_USHORT;
+    (*it).Value = (wb ? "1\0" : "0\0");
+    (*it).DataLength = 1;
+    (*it).GpsTag = FALSE;
 
     if( pt != NULL ) {
         LOGV("pt->latitude == %f", pt->latitude );
