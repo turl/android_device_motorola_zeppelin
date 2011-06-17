@@ -12,7 +12,7 @@ typedef struct
 } camera_position_type;
 
 
-void writeExif( void *origData, void *destData , int origSize , uint32_t *resultSize, int orientation, camera_position_type *pt) ;
+void writeExif( void *origData, void *destData , int origSize , uint32_t *resultSize, int orientation, camera_position_type *pt, int wb, int ledm) ;
 
 #endif
 

@@ -1071,6 +1071,8 @@ void QualcommCameraHardware::runJpegEncodeThread(void *data)
     }
 
     int jpeg_quality = mParameters.getInt("jpeg-quality");
+    int wb = ((CAMERA_WB_AUTO == getParm("whitebalance", whitebalance)) ? 0 : 1); // 0 == Auto, 1 == Manual
+    int ledm = ((LED_MODE_OFF == (led_mode_t) getParm("flash-mode", flashmode)) ? 0 : 1); //1 On, 0 Off
 
     // Receive and convert to jpeg internaly, without using privative app
     if (yuv420_save2jpeg((unsigned char*) mJpegHeap->mHeap->base(),
@@ -1080,7 +1082,7 @@ void QualcommCameraHardware::runJpegEncodeThread(void *data)
         LOGE("jpegConvert failed!");
 
     writeExif(mJpegHeap->mHeap->base(), mJpegHeap->mHeap->base(), mJpegSize,
-            &mJpegSize, rotation, npt);
+            &mJpegSize, rotation, npt, wb, ledm);
 
     receiveJpegPicture();
 
