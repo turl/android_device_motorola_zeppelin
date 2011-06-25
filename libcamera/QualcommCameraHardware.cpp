@@ -2088,10 +2088,10 @@ void QualcommCameraHardware::updateVideoLightMode(int starting)
     {
     FILE *fd = fopen("/sys/class/leds/cam-torch/brightness", "w");
     if (fd) {
-         if (fputs(value != LED_MODE_OFF ? "255" : "0", fd) < 0) {
+         if (fputs(value == LED_MODE_TORCH ? "255" : "0", fd) < 0) {
              LOGE("updateVideoLightMode: virtual file write failed !\n");
          } else {
-             LOGV("updateVideoLightMode '%s' successful", value != LED_MODE_OFF ? "On" : "Off");
+             LOGV("updateVideoLightMode '%s' successful", value == LED_MODE_TORCH ? "On" : "Off");
          }
          fclose(fd);
      } else {
