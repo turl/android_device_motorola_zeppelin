@@ -22,9 +22,5 @@
 <resources>
 	<!-- set this to true if the device doesn't have a GPU, or an EGL
 	     library is for some reason unavailable -->
-	<bool name="softwareGLOnly">true</bool>
-
-	<!-- FFC parameter filtering -->
-	<bool name="ffc_canFocus">true</bool>
-	<bool name="ffc_canZoom">true</bool>
+	<bool name="softwareGLOnly">false</bool>
 </resources>
