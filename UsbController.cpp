@@ -45,6 +45,13 @@ int UsbController::stopRNDIS() {
 }
 
 int UsbController::enableRNDIS(bool enable) {
+    char ums;
+    int fdums = open("/sys/devices/platform/usb_mass_storage/lun0/file", O_RDWR);
+    read(fdums, &ums, 1);
+    close(fdums);
+    if (ums == '/')
+        return 0;
+
     char value[20];
     int fd = open("/sys/devices/platform/msm_hsusb/composition", O_RDWR);
     int count = snprintf(value, sizeof(value), "%s\n", (enable ? "2d61" : "2d66"));
