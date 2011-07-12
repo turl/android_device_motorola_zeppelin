@@ -149,6 +149,11 @@ struct str_map {
     int val;
 };
 
+struct dstr_map {
+    const char *const desc;
+    const char *const val;
+};
+
 // ********************************************************************************************************
 typedef unsigned int exif_tag_id_t;
 
@@ -266,6 +271,7 @@ private:
     bool native_set_parm(cam_ctrl_type type, uint16_t length, void *value);
     bool native_set_dimension(cam_ctrl_dimension_t *value);
     int getParm(const char *parm_str, const str_map *parm_map);
+    const char* getParm(const char *parm_str, const dstr_map *parm_map);
     void setGpsParameters();
     const char *KEY_GPS_LATITUDE;
 
