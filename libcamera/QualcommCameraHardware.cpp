@@ -335,6 +335,7 @@ void QualcommCameraHardware::initDefaultParameters()
     p.set(CameraParameters::KEY_EFFECT, CameraParameters::EFFECT_NONE);
     p.set(CameraParameters::KEY_WHITE_BALANCE, CameraParameters::WHITE_BALANCE_AUTO);
     p.set(CameraParameters::KEY_FLASH_MODE, CameraParameters::FLASH_MODE_AUTO);
+    p.set(CameraParameters::KEY_FOCUS_MODE, CameraParameters::FOCUS_MODE_AUTO);
 
     // This will happen only once in the lifetime of the mediaserver process.
     // We do not free the _values arrays when we destroy the camera object.
@@ -354,6 +355,7 @@ void QualcommCameraHardware::initDefaultParameters()
     p.set(CameraParameters::KEY_SUPPORTED_PICTURE_SIZES, "320x240,640x480,1280x960,1600x1200,2048x1536,2560x1920");
     p.set(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES, "176x144,320x240,352x288,480x320");
     p.set(CameraParameters::KEY_SUPPORTED_FLASH_MODES, flashmode_values);
+    p.set(CameraParameters::KEY_SUPPORTED_FOCUS_MODES, "auto");
 
     // Zoom parameters
     p.set(CameraParameters::KEY_ZOOM_SUPPORTED, "true");
